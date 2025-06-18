@@ -196,31 +196,104 @@ from typing import Annotated
 #         results.update({"q": q})
 #     return results
 
-@app.get("/items/")
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[
+#         str | None,
+#         Query(
+#             alias="item-query",
+#             title="Query string",
+#             description="Query string for the items to search in the database that have a good match",
+#             min_length=3,
+#             max_length=50,
+#             pattern="^fixedquery$",
+#             deprecated=True,
+#         ),
+#     ] = None,
+# ):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items2/")
+# async def read_items(
+#     hidden_query: Annotated[str | None, Query(include_in_schema=False)] = None,
+# ):
+#     if hidden_query:
+#         return {"hidden_query": hidden_query}
+#     else:
+#         return {"hidden_query": "Not found"}
+
+# @app.get("/items/{item_id}")
+# async def read_items(
+#     item_id: Annotated[int, Path(title="The ID of the item to get")],
+#     q: Annotated[str | None, Query(alias="item-query")] = None,
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/{item_id}")
+# async def read_items(q: str, item_id: int = Path(title="The ID of the item to get")):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/{item_id}")
+# async def read_items(
+#     q: str, item_id: Annotated[int, Path(title="The ID of the item to get")]
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/{item_id}")
+# async def read_items(*, item_id: int = Path(title="The ID of the item to get"), q: str):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/{item_id}")
+# async def read_items(
+#     item_id: Annotated[int, Path(title="The ID of the item to get", ge=1)], q: str
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/{item_id}")
+# async def read_items(
+#     item_id: Annotated[int, Path(title="The ID of the item to get", gt=0, le=1000)],
+#     q: str,
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+'''
+gt: greater than
+ge: greater than or equal
+lt: less than
+le: less than or equal
+'''
+
+@app.get("/items/{item_id}")
 async def read_items(
-    q: Annotated[
-        str | None,
-        Query(
-            alias="item-query",
-            title="Query string",
-            description="Query string for the items to search in the database that have a good match",
-            min_length=3,
-            max_length=50,
-            pattern="^fixedquery$",
-            deprecated=True,
-        ),
-    ] = None,
+    *,
+    item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)],
+    q: str,
+    size: Annotated[float, Query(gt=0, lt=10.5)],
 ):
-    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    results = {"item_id": item_id}
     if q:
         results.update({"q": q})
+    if size:
+        results.update({"size": size})
     return results
-
-@app.get("/items2/")
-async def read_items(
-    hidden_query: Annotated[str | None, Query(include_in_schema=False)] = None,
-):
-    if hidden_query:
-        return {"hidden_query": hidden_query}
-    else:
-        return {"hidden_query": "Not found"}
