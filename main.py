@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Union
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 
 class ModelName(str, Enum):
     gpt_3_5_turbo = "gpt-3.5-turbo"
