@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Union
 from pydantic import BaseModel
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 class ModelName(str, Enum):
     gpt_3_5_turbo = "gpt-3.5-turbo"
@@ -114,9 +114,113 @@ class Item(BaseModel):
 # async def update_item(item_id: int, item: Item):
 #     return {"item_id": item_id, "item": item.model_dump()}
 
-@app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item, q: str | None = None):
-    result = {"item_id": item_id, **item.model_dump()}
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Item, q: str | None = None):
+#     result = {"item_id": item_id, **item.model_dump()}
+#     if q:
+#         result.update({"q": q})
+#     return result
+
+from typing import Annotated
+
+
+# @app.get("/items/")
+# async def read_items(q: Annotated[str | None, Query(max_length=50)] = None):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         items = results["items"]
+#         items.append({"q": q})
+#     return items
+
+# @app.get("/items/")
+# async def read_items(q: str | None = Query(default=None, max_length=50)):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[str | None, Query(min_length=3, max_length=50)] = None,
+# ):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[
+#         str | None, Query(min_length=3, max_length=50, pattern="^fixedquery$")
+#     ] = None,
+# ):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/")
+# async def read_items(q: Annotated[list[str] | None, Query()] = None):
+#     query_items = {"q": q}
+#     return query_items
+
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[str | None, Query(title="Query string", min_length=3)] = None,
+# ):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/")
+# async def read_items(
+#     q: Annotated[
+#         str | None,
+#         Query(
+#             title="Query string",
+#             description="Query string for the items to search in the database that have a good match",
+#             min_length=3,
+#         ),
+#     ] = None,
+# ):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+# @app.get("/items/")
+# async def read_items(q: Annotated[str | None, Query(alias="item-query")] = None):
+#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+@app.get("/items/")
+async def read_items(
+    q: Annotated[
+        str | None,
+        Query(
+            alias="item-query",
+            title="Query string",
+            description="Query string for the items to search in the database that have a good match",
+            min_length=3,
+            max_length=50,
+            pattern="^fixedquery$",
+            deprecated=True,
+        ),
+    ] = None,
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     if q:
-        result.update({"q": q})
-    return result
+        results.update({"q": q})
+    return results
+
+@app.get("/items2/")
+async def read_items(
+    hidden_query: Annotated[str | None, Query(include_in_schema=False)] = None,
+):
+    if hidden_query:
+        return {"hidden_query": hidden_query}
+    else:
+        return {"hidden_query": "Not found"}
