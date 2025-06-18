@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import Union
-from pydantic import BaseModel
+from typing import Union, Literal
+from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Query, Path
 
@@ -284,16 +284,28 @@ lt: less than
 le: less than or equal
 '''
 
-@app.get("/items/{item_id}")
-async def read_items(
-    *,
-    item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)],
-    q: str,
-    size: Annotated[float, Query(gt=0, lt=10.5)],
-):
-    results = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
-    if size:
-        results.update({"size": size})
-    return results
+# @app.get("/items/{item_id}")
+# async def read_items(
+#     *,
+#     item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)],
+#     q: str,
+#     size: Annotated[float, Query(gt=0, lt=10.5)],
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     if size:
+#         results.update({"size": size})
+#     return results
+
+class FilterParams(BaseModel):
+    model_config = {"extra": "forbid"}
+    
+    limit: int = Field(100, gt=0, le=100)
+    offset: int = Field(0, ge=0)
+    order_by: Literal["created_at", "updated_at"] = "created_at"
+    tags: list[str] = []
+    
+@app.get("/items/")
+async def read_items(filter_query: Annotated[FilterParams, Query()]):
+    return filter_query
