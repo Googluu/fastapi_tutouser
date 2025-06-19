@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Union, Literal
 from pydantic import BaseModel, Field
 
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 
 class ModelName(str, Enum):
     gpt_3_5_turbo = "gpt-3.5-turbo"
@@ -298,14 +298,69 @@ le: less than or equal
 #         results.update({"size": size})
 #     return results
 
-class FilterParams(BaseModel):
-    model_config = {"extra": "forbid"}
+# class FilterParams(BaseModel):
+#     model_config = {"extra": "forbid"}
     
-    limit: int = Field(100, gt=0, le=100)
-    offset: int = Field(0, ge=0)
-    order_by: Literal["created_at", "updated_at"] = "created_at"
-    tags: list[str] = []
+#     limit: int = Field(100, gt=0, le=100)
+#     offset: int = Field(0, ge=0)
+#     order_by: Literal["created_at", "updated_at"] = "created_at"
+#     tags: list[str] = []
     
-@app.get("/items/")
-async def read_items(filter_query: Annotated[FilterParams, Query()]):
-    return filter_query
+# @app.get("/items/")
+# async def read_items(filter_query: Annotated[FilterParams, Query()]):
+#     return filter_query
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+# @app.put("/items/{item_id}")
+# async def update_item(
+#     item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)],
+#     q: str | None = None,
+#     item: Item | None = None,
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     if item:
+#         results.update({"item": item})
+#     return results
+
+class User(BaseModel):
+    username: str
+    full_name: str | None = None
+
+
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Item, user: User):
+#     results = {"item_id": item_id, "item": item, "user": user}
+#     return results
+
+# @app.put("/items/{item_id}")
+# async def update_item(
+#     item_id: int, item: Item, user: User, importance: Annotated[int, Body()]
+# ):
+#     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+#     return results
+
+# @app.put("/items/{item_id}")
+# async def update_item(
+#     *,
+#     item_id: int,
+#     item: Item,
+#     user: User,
+#     importance: Annotated[int, Body(gt=0)],
+#     q: str | None = None,
+# ):
+#     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Annotated[Item, Body(embed=True)]):
+    results = {"item_id": item_id, "item": item}
+    return results
